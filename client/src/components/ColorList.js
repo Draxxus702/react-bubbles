@@ -1,10 +1,12 @@
-import React, { useState } from "react";
-import axios from "axios";
-
+import React, { useState} from "react";
+import {axiosWithAuth} from '../utils/axiosWithAuth'
+import {  useRouteMatch, useHistory } from 'react-router-dom';
 const initialColor = {
   color: "",
   code: { hex: "" }
 };
+
+
 
 const ColorList = ({ colors, updateColors }) => {
   console.log(colors);
@@ -15,16 +17,36 @@ const ColorList = ({ colors, updateColors }) => {
     setEditing(true);
     setColorToEdit(color);
   };
+  const match = useRouteMatch();
+  const history = useHistory()
 
   const saveEdit = e => {
     e.preventDefault();
     // Make a put request to save your updated color
     // think about where will you get the id from...
     // where is is saved right now?
+    axiosWithAuth()
+    .put(`/api/colors/${colorToEdit.id}`, colorToEdit)
+    .then(res =>{
+        history.push(`/bubblepage`)
+    })
+    .catch(err =>{
+      console.log(err)
+    })
+
   };
 
   const deleteColor = color => {
     // make a delete request to delete this color
+    axiosWithAuth()
+    .delete(`http://localhost:5000/api/colors/${color.id}`)
+    .then(res =>{
+      axiosWithAuth()
+      .get('http://localhost:5000/api/colors')
+      .then(res =>{
+        updateColors(res.data)
+      })
+    })
   };
 
   return (
